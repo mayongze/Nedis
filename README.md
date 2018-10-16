@@ -19,7 +19,10 @@
    - [ngx_devel_kit(NDK)](https://github.com/simpl/ngx_devel_kit/archive/v0.2.19.tar.gz)
      NDK（nginx development kit）模块是一个拓展nginx服务器核心功能的模块，第三方模块开发可以基于它来快速实现
      NDK提供函数和宏处理一些基本任务，减轻第三方模块开发的代码量
-     
+   - [luarocks](https://github.com/luarocks/luarocks)
+     管理lua的插件和软件包
+   - cjson.so
+     lua的json库
    
    **编译安装**
 
