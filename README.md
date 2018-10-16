@@ -19,22 +19,44 @@
    - [ngx_devel_kit(NDK)](https://github.com/simpl/ngx_devel_kit/archive/v0.2.19.tar.gz)
      NDK（nginx development kit）模块是一个拓展nginx服务器核心功能的模块，第三方模块开发可以基于它来快速实现
      NDK提供函数和宏处理一些基本任务，减轻第三方模块开发的代码量
+     
+   
+   **编译安装**
 
-   **安装LuaJIT2.1**
-
-   ```
-   cd /usr/local/src
+   ```bash
+   # 安装LuaJIT2.1
    wget http://luajit.org/download/LuaJIT-2.1.0-beta2.tar.gz
    tar zxf LuaJIT-2.1.0-beta2.tar.gz
    cd LuaJIT-2.1.0-beta2
    make PREFIX=/usr/local/luajit
    make install PREFIX=/usr/local/luajit
-   ```
    
-   **Nginx参考编译参数**
-
-   ```
-   ./configure --prefix=/export/servers/nginx --with-stream --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_stub_status_module --with-stream_ssl_module --with-pcre --with-ld-opt=-ljemalloc --with-ld-opt=-Wl,-rpath,/usr/local/luajit/lib --add-module=/export/software/ngx_devel_kit-0.3.1rc1 --add-module=/export/software/lua-nginx-module-0.10.13 --add-module=/export/software/stream-lua-nginx-module-0.0.5
+   # 下载nginx
+   wget 'http://nginx.org/download/nginx-1.14.0.tar.gz'
+   tar -xzvf nginx-1.14.0.tar.gz
+   cd nginx-1.14.0/
+   
+   export LUAJIT_LIB=/usr/local/luajit/lib
+   export LUAJIT_INC=/usr/local/luajit/include/luajit-2.1
+   
+   # /export/software 目录里放置依赖的拓展模块 ngx_devel_kit-0.3.1rc1 lua-nginx-module-0.10.13 stream-lua-nginx-module-0.0.5
+   ./configure --prefix=/export/servers/nginx \
+   --with-stream \
+   --with-http_ssl_module \
+   --with-http_v2_module \
+   --with-http_realip_module \
+   --with-http_stub_status_module \
+   --with-stream_ssl_module \
+   --with-pcre \
+   --with-ld-opt=-ljemalloc \
+   --with-ld-opt=-Wl,-rpath,/usr/local/luajit/lib \
+   --add-module=/export/software/ngx_devel_kit-0.3.1rc1 \
+   --add-module=/export/software/lua-nginx-module-0.10.13 \
+   --add-module=/export/software/stream-lua-nginx-module-0.0.5
+   
+   # 使用4核心CPU编译
+   make -j4
+   make install
    ```
 
 2. Nginx配置文件nginx.conf 文件下面添加 `include nginx-nedis.conf` 
