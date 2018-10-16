@@ -9,9 +9,16 @@
 1. 重新编译Nginx增加以下依赖模块
 
    - [stream-lua-nginx-module](https://github.com/openresty/stream-lua-nginx-module#installation)
+     将Lua的强大功能嵌入到Nginx流/ TCP服务器中
+   - [lua-nginx-module](https://github.com/openresty/lua-nginx-module)
+     将Lua的强大功能嵌入到Nginx HTTP服务器中
    - [lua-resty-redis](https://github.com/openresty/lua-resty-redis#installation)
+     基于cosocket API的ngx_lua的Lua redis客户端驱动程序
    - [lua-resty-core](https://github.com/openresty/lua-resty-core#synopsis)
+     OpenResty 组件的一部分,提供了对 lua-nginx-module Lua 接口的替换实现,和一些新接口
    - [ngx_devel_kit(NDK)](https://github.com/simpl/ngx_devel_kit/archive/v0.2.19.tar.gz)
+     NDK（nginx development kit）模块是一个拓展nginx服务器核心功能的模块，第三方模块开发可以基于它来快速实现
+     NDK提供函数和宏处理一些基本任务，减轻第三方模块开发的代码量
 
    **安装LuaJIT2.1**
 
@@ -23,7 +30,7 @@
    make PREFIX=/usr/local/luajit
    make install PREFIX=/usr/local/luajit
    ```
-
+   
    **Nginx参考编译参数**
 
    ```
