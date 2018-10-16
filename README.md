@@ -33,6 +33,8 @@
    cd LuaJIT-2.1.0-beta2
    make PREFIX=/usr/local/luajit
    make install PREFIX=/usr/local/luajit
+   # 如果 luajit安装到了自定义目录下面还需要添加一个软链接
+   # ln -s /export/servers/nginx/openresty/luajit/lib/libluajit-5.1.so.2 /lib64/libluajit-5.1.so.2
    
    # 下载nginx
    wget 'http://nginx.org/download/nginx-1.14.0.tar.gz'
