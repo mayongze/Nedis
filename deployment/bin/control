@@ -42,6 +42,8 @@ start(){
         echo "[WARN] $PROC_NAME is aleady running!"
         return 0
     fi
+	#做Logs的软链接
+	ln -sf /export/Logs/$SKYWING_APP_NAME/$SKYWING_INSTANCE_NAME /export/Logs/link
 
 	/bin/rm -rf "/usr/local/share/lua/5.1/nedis"
     /usr/bin/cp -r nedis ${NEDIS_HOME}/share/lua/5.1/nedis
