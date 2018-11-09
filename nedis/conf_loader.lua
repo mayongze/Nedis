@@ -6,14 +6,24 @@ local _M = { _VERSION = '0.0.1' }
 
 -- sentinel列表
 _M.sentinel_list = {
-	{ "127.0.0.1", 6403 },
-	{ "127.0.0.1", 6404 },
-	{ "127.0.0.1", 6405 }
+	{ "10.226.192.9", 6500 },
+	{ "10.226.192.10", 6500 },
+	{ "10.226.192.11", 6500 },
+	{ "10.226.192.75", 6500 },
+	{ "10.226.192.111", 6500 },
+	{ "10.226.192.139", 6500 },
 }
 
 -- sentinel监控的masterName列表
 _M.sentinel_master_name_list = {
-	"sentinel-10.237.40.208-6401"
+	"cdn-back",
+	"jcs-stag",
+	"jks-stag",
+	"rms-stag",
+	"jcr-stag",
+	"iaas-zbs",
+	"public-stag",
+	"iaas-zbs-2"
 }
 
 return _M
@@ -25,21 +35,17 @@ local pl_path = require "pl.path"
 local pl_file = require "pl.file"
 local pl_stringio = require "pl.stringio"
 local pl_config = require "pl.config"
-
 local DEFAULT_PATHS = {
   "/etc/nedis.conf"
 }
-
 function _M.load(path, custom_conf)
 	if path and pl_path.exists(path) then
 		return nil, "not file at:"..path
 	end
-
 	local f, err = pl_file.read(path)
 	if not f then return nil, err end
 	ngx_log(DEBUG,"reading config file at ",path)
 	local from_file_conf = {}
-
     local s = pl_stringio.open(f)
     from_file_conf, err = pl_config.read(s, {
       smart = false,

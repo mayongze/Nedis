@@ -134,12 +134,17 @@ local function init_redis_link()
 	local red = redis:new()
 	red:set_timeout(1000) -- 1 sec
 
-	-- 这可以随机连一个
-	local ok, err = red:connect(sentinel_list[1][1], sentinel_list[1][2])
-	if err then
+	-- 这可以随机连一个,考虑第一次连不上的情况
+	for i,v in ipairs(sentinel_list) do
+	    local ok, err = red:connect(v[1], v[2])
+	    if err then
 		-- failed
 		log(ERR,"redis connect failed: ", err)
-	end
+	    else
+                -- 成功则跳出
+                break
+	    end
+        end
 
 	-- 循环查询所有主节点
 	for i, name in ipairs(sentinel_master_name_list) do
@@ -174,7 +179,7 @@ end
 
 -- master 进程初始化
 function Nedis.init()
-	local pl_path = require "pl.path"
+	local pl_path = require "luarocks.path"
 	-- ngx.conf.prefix 前缀路径 -p指定
 	
 	--local conf_path = pl_path.join(ngx.config.prefix(), "nedis.conf")
