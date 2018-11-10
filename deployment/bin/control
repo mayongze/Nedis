@@ -42,22 +42,25 @@ start(){
         echo "[WARN] $PROC_NAME is aleady running!"
         return 0
     fi
-	#做Logs的软链接
-	ln -sf /export/Logs/$SKYWING_APP_NAME/$SKYWING_INSTANCE_NAME /export/Logs/link
+    #做Logs的软链接
+    ln -sfT /export/Logs/$SKYWING_APP_NAME/$SKYWING_INSTANCE_NAME /export/Logs/link
 
-	/bin/rm -rf "/usr/local/share/lua/5.1/nedis"
-    /usr/bin/cp -r nedis ${NEDIS_HOME}/share/lua/5.1/nedis
-	#覆盖配置文件
-	/usr/bin/cp -r conf/* $CONFIG_HOME/
+	#删除旧的模块
+    /bin/rm -rf "/usr/local/share/lua/5.1/nedis/*"
+	#拷贝nedis模块
+    /usr/bin/cp -r nedis /usr/local/share/lua/5.1/
+    #创建配置目录并且覆盖配置文件
+    [ ! -d $CONFIG_HOME ] && mkdir -p $CONFIG_HOME
+    /usr/bin/cp -r conf/* $CONFIG_HOME/
     export LC_CTYPE=en_US.UTF-8
     export LC_ALL=en_US.UTF-8
-	#检查配置文件是否正确
-	output=`$CHECK_CONFIG_COMMAND`
-	if [ $? != 0 ]; then
-	    echo "[ERR] nginx configtest failed. output[$output]"
-		return 1
-	fi
-	
+    #检查配置文件是否正确
+    output=`$CHECK_CONFIG_COMMAND`
+    if [ $? != 0 ]; then
+        echo "[ERR] nginx configtest failed. output[$output]"
+        return 1
+    fi
+    
     nohup $START_COMMAND  </dev/null &>> /dev/termination-log  &
   
     for i in $(seq $WAIT_TIME) ; do
