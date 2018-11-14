@@ -2,7 +2,7 @@ local ngx_log = ngx.log
 local ERR = ngx.ERR
 local DEBUG = ngx.DEBUG
 
-local _M = { _VERSION = '0.0.1' }
+local _M = { _VERSION = '1.0.1' }
 
 -- sentinel列表
 _M.sentinel_list = {

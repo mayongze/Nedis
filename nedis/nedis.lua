@@ -12,7 +12,9 @@ local Nedis = {}
 
 local timer_at = ngx.timer.at
 local ngx_log = ngx.log
+local CRIT = ngx.CRIT
 local ERR = ngx.ERR
+local NOTICE = ngx.NOTICE
 local DEBUG = ngx.DEBUG
 
 -- 重试时间 每次*2
@@ -102,10 +104,12 @@ local function handle_sub(premature, host, port)
 			-- 结果长度一定为3
 			local master_info = utils.split(res[3]," ")
 			-- 判断ip端口和之前是否一致
-			-- 判断failover的master name是否在配置列表里
-			if utils.isInTable(master_info[1], sentinel_master_name_list) then
-				ngx.shared.nedis:set(master_info[1], master_info[4]..":"..master_info[5], 0)
-				log(DEBUG, master_info[1].." success failover current addr:", ngx.shared.nedis:get(master_info[1]))
+			local backend = master_info[4]..":"..master_info[5]
+			if backend ~= ngx.shared.nedis:get(master_name[1]) then
+				ngx.shared.nedis:set(master_info[1], backend, 0)
+				log(DEBUG, master_info[1].." success failover current addr:", ngx.shared.nedis:get(master_info[1]))			
+			else
+				log(DEBUG, master_info[1].."Has been failover by other threads, current addr:", ngx.shared.nedis:get(master_info[1]))	
 			end
 		end
 		-- 检测下是否reload或者退出，防止worker进程出现down
@@ -129,8 +133,9 @@ local function get_sentinel_master_addr(red, name )
 	end	
 	return res
 end
--- redis链路初始化
-local function init_redis_link()
+
+-- 获取sentinel下所有的master
+local function get_all_curr_master()
 	local red = redis:new()
 	red:set_timeout(1000) -- 1 sec
 
@@ -138,34 +143,56 @@ local function init_redis_link()
 	for i,v in ipairs(sentinel_list) do
 	    local ok, err = red:connect(v[1], v[2])
 	    if err then
-		-- failed
-		log(ERR,"redis connect failed: ", err)
+			-- failed
+			log(ERR,"redis connect failed: ", err)
+			if #(sentinel_list) == i then
+				return false
+			end
 	    else
-                -- 成功则跳出
-                break
+			-- 成功则跳出
+			break
 	    end
-        end
+    end
 
-	-- 循环查询所有主节点
-	for i, name in ipairs(sentinel_master_name_list) do
-		local master_addr  --"sentinel-10.237.40.208-6401"
-		master_addr = get_sentinel_master_addr(red, name)
-		if #(master_addr) ~= 2 then
-			log(ERR,"sentinel monitor nodes "..name.." exception.")
-		else
-			log(DEBUG,"init worker,"..name.." current master:", cjson.encode(master_addr))
-			ngx.shared.nedis:set(name,master_addr[1]..":"..master_addr[2],0)
-
-			log(DEBUG,name.." route :",ngx.shared.nedis:get(name))
+	-- 获取当前sentinel_list内的所有master_name
+	local res, err = red:sentinel("masters")
+	if err then
+		ngx.log(ngx.ERR,"redis execution [sentinel masters] error :",err)
+		return false
+	end
+	if res then
+		for idx,value in ipairs(res) do
+			-- 1.name 3.ip 5.port 9.flags[s_down,master,disconnected]
+			local name = value[2]
+			local ip = value[4]
+			local port = value[6]
+			local flags = value[10]
+			
+			log(DEBUG,"init worker,"..name.." current master:", cjson.encode(value))
+			ngx.shared.nedis:set(name,ip..":"..port,0)
+			log(NOTICE,name.." init route :",ngx.shared.nedis:get(name))
 		end
 	end
 
 	local ok, err = red:close()
 	if not ok then
 		log(ERR,"failed to close: ", err)
-		return
-	end	
+		return false
+	end		
+	
+	return true
+end
 
+-- redis链路初始化
+local function init_redis_link()
+
+	local ok = get_all_curr_master()
+	if not ok then
+		-- 抛异常
+		log(CRIT,"fail to get master from the sentinel.")
+		return
+	end
+	
 	-- 创建定时任务订aaaaa阅sentinel failover消息
 	-- 有几个sentinel 就建立几个订阅
 	for i, v in ipairs(sentinel_list) do
