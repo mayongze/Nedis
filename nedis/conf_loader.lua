@@ -14,18 +14,6 @@ _M.sentinel_list = {
 	{ "10.226.192.139", 6500 },
 }
 
--- sentinel监控的masterName列表
-_M.sentinel_master_name_list = {
-	"cdn-back",
-	"jcs-stag",
-	"jks-stag",
-	"rms-stag",
-	"jcr-stag",
-	"iaas-zbs",
-	"public-stag",
-	"iaas-zbs-2"
-}
-
 return _M
 
 

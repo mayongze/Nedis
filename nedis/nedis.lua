@@ -6,7 +6,6 @@ local utils = require "nedis.utils.util"
 -- 加载配置文件
 local conf_loader = require "nedis.conf_loader"
 local sentinel_list = conf_loader.sentinel_list
-local sentinel_master_name_list = conf_loader.sentinel_master_name_list
 
 local Nedis = {}
 
