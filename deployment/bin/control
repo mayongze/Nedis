@@ -77,7 +77,7 @@ start(){
   
 stop(){
     if [[ -n "$PROC_PORT"  ]] ; then
-        PROC_ID=$(  /usr/sbin/ss -nltp "( sport = :$PROC_PORT )" |sed 1d  | awk '{print $NF}' |  grep -oP '\,.*\,' | grep -oP "\d+" |  uniq )
+        PROC_ID=$(  /usr/sbin/ss -nltp "( sport = :$PROC_PORT )" |sed 1d  | awk '{print $NF}' |  grep -oP "pid=\d+\,fd"|grep -oP "\d+" | uniq )
     else
         PROC_ID=$(ps -eo comm,pid  | grep "^$PROC_NAME\b" |awk '{print $2}')
     fi

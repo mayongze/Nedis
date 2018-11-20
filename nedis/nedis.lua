@@ -104,7 +104,7 @@ local function handle_sub(premature, host, port)
 			local master_info = utils.split(res[3]," ")
 			-- 判断ip端口和之前是否一致
 			local backend = master_info[4]..":"..master_info[5]
-			if backend ~= ngx.shared.nedis:get(master_name[1]) then
+			if backend ~= ngx.shared.nedis:get(master_info[1]) then
 				ngx.shared.nedis:set(master_info[1], backend, 0)
 				log(DEBUG, master_info[1].." success failover current addr:", ngx.shared.nedis:get(master_info[1]))			
 			else
